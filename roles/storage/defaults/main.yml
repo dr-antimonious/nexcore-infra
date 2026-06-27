@@ -1,0 +1,20 @@
+---
+shared_mount: /mnt/shared
+shared_group: dev
+
+vg_name: vg_shared
+lv_name: lv_shared
+exports_path: /etc/exports
+
+storage_services:
+- nfs
+- rpc-bind
+- mountd
+
+dev_list:
+- /dev/vdb
+- /dev/vdc
+
+part_list:
+- /dev/vdb1
+- /dev/vdc1

@@ -1,0 +1,38 @@
+---
+- name: Trigger service restart before testing
+  ansible.builtin.meta: flush_handlers
+
+- name: Try to resolve domains
+  ansible.builtin.command:
+    cmd: "getent hosts {{ item }}.{{ company_domain }}"
+  loop: "{{ dns_records.keys() }}"
+  register: dns_check_report
+  changed_when: false
+
+- name: Fail if any DNS record cannot be resolved
+  ansible.builtin.assert:
+    that: item.rc == 0
+    fail_msg: "DNS lookup failed for {{ item.item }}"
+  loop: "{{ dns_check_report.results }}"
+
+- name: Accumulate DNS results into report
+  ansible.builtin.set_fact:
+    run_report: >-
+      {{
+        run_report | default({}) |
+        combine(
+          {
+            'dns': (
+              run_report.dns | default([]) +
+              [
+                {
+                  'domain': item.item,
+                  'success': item.rc == 0,
+                  'result': item.stdout
+                }
+              ]
+            )
+          }
+        )
+      }}
+  loop: "{{ dns_check_report.results }}"

@@ -1,0 +1,13 @@
+---
+- name: Remove lab .conf that gets in the way
+  ansible.builtin.file:
+    path: "{{ rhlab_conf }}"
+    state: absent
+  register: conf_report
+
+- name: Remove fake resolv.conf
+  ansible.builtin.file:
+    path: "{{ fake_resolv }}"
+    state: absent
+  when: conf_report.changed
+  notify: Restart NetworkManager

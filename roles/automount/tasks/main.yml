@@ -1,0 +1,7 @@
+---
+- name: Install autofs
+  ansible.builtin.package:
+    name: autofs
+    state: present
+
+

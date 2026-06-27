@@ -1,0 +1,35 @@
+---
+- name: Register keys for users
+  ansible.posix.authorized_key:
+    user: "{{ item.username }}"
+    state: present
+    key: "{{ lookup('file', pubkey_dir ~ item.username ~ '.pub') }}"
+  loop: "{{ users }}"
+  register: key_report
+
+- name: Get users whose keys were updated
+  ansible.builtin.set_fact:
+    updated_keys: >-
+      {{
+        key_report.results
+        | selectattr('changed', 'equalto', true)
+        | map(attribute='item.username')
+        | list
+      }}
+
+- name: Accumulate updated keys into report
+  ansible.builtin.set_fact:
+    run_report: >-
+      {{
+        run_report | default({}) |
+        combine(
+          {
+            'keys': {
+              'authorized': updated_keys,
+              'count': updated_keys | length
+            }
+          },
+          recursive=True
+        )
+      }}
+  when: updated_keys | length > 0

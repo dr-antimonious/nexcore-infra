@@ -1,0 +1,26 @@
+---
+- name: Ensure firewalld is installed
+  ansible.builtin.package:
+    name: firewalld
+    state: present
+
+- name: Enable and start firewalld
+  ansible.builtin.systemd:
+    name: firewalld
+    enabled: true
+    state: started
+
+- name: Ensure SELinux is enforcing
+  ansible.posix.selinux:
+    policy: targeted
+    state: enforcing
+
+- name: Configure SSH authentication policy
+  ansible.builtin.copy:
+    src: "{{ sshd_conf_src }}"
+    dest: "{{ sshd_conf_dest }}"
+    owner: root
+    group: root
+    mode: '0640'
+    validate: '/usr/sbin/sshd -t -f %s'
+  notify: Restart sshd

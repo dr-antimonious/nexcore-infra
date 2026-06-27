@@ -1,0 +1,27 @@
+---
+company_name: nexcore
+company_domain: "{{ company_name }}.local"
+
+pubkey_dir: sshkeys/
+
+network_mask: 172.25.250.0/24
+
+dns_records:
+  www: "{{ www_record_required | default(false) }}"
+  wiki: "{{ wiki_record_required | default(false) }}"
+
+users:
+- username: ops01
+  groups:
+  - ops
+  sudo: yes
+- username: dev01
+  groups:
+  - dev
+  sudo: no
+- username: dev02
+  groups:
+  - dev
+- username: mkt01
+  groups:
+  - marketing

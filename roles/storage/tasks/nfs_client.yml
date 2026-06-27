@@ -1,0 +1,17 @@
+---
+- name: Install NFS utilities
+  ansible.builtin.include_tasks: nfs_utils.yml
+
+- name: Create mount point
+  ansible.builtin.file:
+    path: "{{ shared_mount }}"
+    state: directory
+
+- name: Mount NFS share
+  ansible.posix.mount:
+    path: "{{ shared_mount }}"
+    src: "{{ groups['storage'][0] }}:{{ shared_mount }}"
+    fstype: nfs
+    opts: rw
+    state: mounted
+    boot: yes

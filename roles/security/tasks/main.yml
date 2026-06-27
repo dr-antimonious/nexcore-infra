@@ -1,0 +1,9 @@
+---
+- name: Setup security basics
+  ansible.builtin.include_tasks: base.yml
+
+- name: Register keys for users
+  ansible.builtin.include_tasks: ssh_setup.yml
+
+- name: Configure sudo access
+  ansible.builtin.include_tasks: sudo_setup.yml

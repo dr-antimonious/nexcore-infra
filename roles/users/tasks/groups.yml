@@ -1,0 +1,41 @@
+---
+- name: Add groups
+  ansible.builtin.group:
+    name: "{{ item }}"
+    state: present
+  register: group_results
+  loop: >-
+    {{
+       users
+       | map(attribute='groups')
+       | flatten
+       | unique
+       | list
+    }}
+
+- name: Get created groups
+  ansible.builtin.set_fact:
+    created_groups: >-
+      {{
+        group_results.results
+        | selectattr('changed', 'equalto', true)
+        | map(attribute='item')
+        | list
+      }}
+
+- name: Accumulate created groups into report
+  ansible.builtin.set_fact:
+    run_report: >-
+      {{
+        run_report | default({}) |
+        combine(
+          {
+            'groups': {
+              'created': created_groups,
+              'count': created_groups | length
+            }
+          },
+          recursive=True
+        )
+      }}
+  when: created_groups | length > 0

@@ -1,0 +1,23 @@
+---
+- hosts: localhost
+  connection: local
+  roles:
+  - role: testbench # Necessary to generate SSH keys for security role
+
+- hosts: all
+  roles:
+  - role: cleanup # Only necessary because of the super weird RedHat lab configuration
+  - role: users
+  - role: security
+#  - role: dns
+  - role: storage
+  become: yes
+
+- hosts: automount
+  roles:
+  - role: automount
+  become: yes
+
+- hosts: all
+  roles:
+  - role: debug

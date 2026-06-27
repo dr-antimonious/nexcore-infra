@@ -1,0 +1,23 @@
+$TTL 86400
+@ IN SOA {{ groups['dns'][0] }}.{{ company_domain }}. ops01.{{ company_domain }}. (
+    2026062201
+    3600
+    1800
+    604800
+    86400 )
+
+@ IN NS {{ groups['dns'][0] }}.{{ company_domain }}.
+
+{% for hostname in groups['all'] %}
+{{ hostname }} IN A {{ hostvars[hostname].ansible_host }}
+{% endfor %}
+
+{% for hostname in groups['all'] %}
+{% for record, required in hostvars[hostname].dns_records.items() | default({}) %}
+{% if required %}
+{{ record }} IN A {{ hostvars[hostname].ansible_host }}
+{% endif %}
+{% endfor %}
+{% endfor %}
+
+@ IN MX 10 {{ groups['mail'][0] }}.{{ company_domain }}.

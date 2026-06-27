@@ -1,0 +1,4 @@
+---
+sshd_conf_dir: /etc/ssh/sshd_config.d/
+sshd_conf_src: 10-company-infra.conf
+sshd_conf_dest: "{{ sshd_conf_dir }}10-{{ company_name }}-infra.conf"

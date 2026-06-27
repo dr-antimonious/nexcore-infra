@@ -1,0 +1,12 @@
+---
+- name: Add sshkeys directory
+  ansible.builtin.file:
+    path: "{{ full_pubkey_dir_path }}"
+    state: directory
+    mode: '0755'
+
+- name: Create ssh keys for users
+  community.crypto.openssh_keypair:
+    path: "{{ full_pubkey_dir_path }}{{ item.username }}"
+    type: ed25519
+  loop: "{{ users }}"

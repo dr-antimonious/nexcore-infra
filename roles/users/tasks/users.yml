@@ -1,0 +1,55 @@
+---
+- name: Add users
+  ansible.builtin.user:
+    name: "{{ item.username }}"
+    expires: -1
+    state: present
+    create_home: yes
+    password_lock: yes
+    group: >-
+      {{
+        item.groups[0]
+        if item.groups | length > 0
+        else omit
+      }}
+    groups: >-
+      {{
+        item.groups[1:]
+        if item.groups | length > 1
+        else omit
+      }}
+    append: >-
+      {{
+        yes
+        if item.groups | length > 1
+        else omit
+      }}
+  register: user_results
+  loop: "{{ users }}"
+
+- name: Get created users
+  ansible.builtin.set_fact:
+    created_users: >-
+      {{
+        user_results.results
+        | selectattr('changed', 'equalto', true)
+        | map(attribute='item')
+        | list
+      }}
+
+- name: Accumulate created users into report
+  ansible.builtin.set_fact:
+    run_report: >-
+      {{
+        run_report | default({}) |
+        combine(
+          {
+            'users': {
+              'created': created_users,
+              'count': created_users | length
+            }
+          },
+          recursive=True
+        )
+      }}
+  when: created_users | length > 0

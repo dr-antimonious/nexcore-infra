@@ -1,0 +1,85 @@
+---
+- name: Install LVM tools
+  ansible.builtin.package:
+    name: lvm2
+    state: present
+
+- name: Install NFS utilities
+  ansible.builtin.include_tasks: nfs_utils.yml
+
+- name: Ensure NFS service enabled
+  ansible.builtin.service:
+    name: nfs-server
+    state: started
+    enabled: true
+
+- name: Create partitions
+  community.general.parted:
+    device: "{{ item }}"
+    number: 1
+    flags: [lvm]
+    state: present
+  loop: "{{ dev_list }}"
+
+- name: Create volume group
+  community.general.lvg:
+    vg: "{{ vg_name }}"
+    pvs: "{{ part_list }}"
+
+- name: Create logical volume
+  community.general.lvol:
+    vg: "{{ vg_name }}"
+    lv: "{{ lv_name }}"
+    size: 100%FREE
+    pvs: "{{ part_list }}"
+    shrink: false
+
+- name: Create filesystem
+  community.general.filesystem:
+    dev: "/dev/{{ vg_name }}/{{ lv_name }}"
+    fstype: xfs
+
+- name: Create mount point
+  ansible.builtin.file:
+    path: "{{ shared_mount }}"
+    state: directory
+    owner: root
+    group: "{{ shared_group }}"
+    mode: '2770'
+
+- name: Mount filesystem
+  ansible.posix.mount:
+    path: "{{ shared_mount }}"
+    src: "/dev/{{ vg_name }}/{{ lv_name }}"
+    fstype: xfs
+    state: mounted
+
+- name: Configure export
+  ansible.builtin.lineinfile:
+    path: "{{ exports_path }}"
+    line: "{{ shared_mount }} {{ network_mask }}(rw,sync)"
+    create: yes
+  register: export_report
+
+- name: Restart NFS
+  ansible.builtin.service:
+    name: nfs-server
+    state: restarted
+  when: export_report.changed | default(false)
+
+- name: Open DNS ports
+  ansible.posix.firewalld:
+    service: "{{ item }}"
+    permanent: true
+    state: enabled
+    immediate: true
+  loop: "{{ storage_services }}"
+
+- name: Create per-user NFS directories
+  ansible.builtin.file:
+    path: "{{ shared_mount }}/users/{{ item }}"
+    state: directory
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: '0750'
+  loop: "{{ users }}"

@@ -1,0 +1,3 @@
+---
+rhlab_conf: /etc/NetworkManager/conf.d/99-cloud-init.conf
+fake_resolv: /etc/resolv.conf

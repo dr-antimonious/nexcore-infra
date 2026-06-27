@@ -1,0 +1,17 @@
+---
+- name: Configure DNS server
+  ansible.builtin.include_tasks: dns_server.yml
+  when: "'dns' in group_names"
+
+- name: Configure NetworkManager DNS information
+  community.general.nmcli:
+    conn_name: "{{ net_conn_name }}"
+    dns4:
+      - "{{ hostvars[groups['dns'][0]].ansible_host }}"
+    dns4_ignore_auto: true
+    dns4_search: "{{ company_domain }}"
+    state: present
+  notify: Restart NetworkManager
+
+- name: Test DNS configuration
+  ansible.builtin.include_tasks: test_dns.yml

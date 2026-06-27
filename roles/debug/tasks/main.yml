@@ -1,0 +1,8 @@
+---
+- name: Handle empty report
+  ansible.builtin.set_fact:
+    run_report: "{{ run_report | default({}) }}"
+
+- name: Print playbook report
+  ansible.builtin.debug:
+    var: run_report

@@ -1,0 +1,6 @@
+---
+- name: Add groups
+  ansible.builtin.include_tasks: groups.yml
+
+- name: Add users
+  ansible.builtin.include_tasks: users.yml

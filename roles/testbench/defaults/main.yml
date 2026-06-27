@@ -1,0 +1,2 @@
+---
+full_pubkey_dir_path: "/home/student/{{ company_name }}-infra/roles/security/files/{{ pubkey_dir }}"

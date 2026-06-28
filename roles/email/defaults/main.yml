@@ -1,0 +1,10 @@
+---
+postfix_config:
+- "mynetworks = {{ network_mask }}"
+- "mydomain = {{ company_domain }}"
+- "myorigin = $mydomain"
+- "myhostname = {{ ansible_hostname }}.$mydomain"
+- "mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain"
+- "inet_interfaces = $myhostname, {{ ansible_host }}"
+- "inet_protocols = ipv4"
+- "mail_spool_directory = /var/spool/mail"

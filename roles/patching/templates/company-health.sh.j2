@@ -1,7 +1,9 @@
 #!/bin/bash
 
-echo "$(date '+%Y-%m-%d %H:%M:%S') \
+output="$(date '+%Y-%m-%d %H:%M:%S') \
 hostname=$(hostname) \
 uptime=\"$(uptime -p)\" \
-disk_usage=$(df -h / | awk 'NR==2 {print $5}')" \
->> {{ health_log_path }}
+disk_usage=$(df -h / | awk 'NR==2 {print $5}')"
+
+echo "$output" >> {{ health_log_path }}
+echo "$output" | mail -s "Daily Health Check $(hostname)" {{ ops_user }}@{{ company_domain }}

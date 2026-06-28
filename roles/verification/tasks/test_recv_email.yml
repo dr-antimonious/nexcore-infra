@@ -1,0 +1,6 @@
+---
+- name: Verify delivery
+  ansible.builtin.wait_for:
+    path: "/var/spool/mail/{{ item.username }}"
+    search_regex: "{{ hostvars[groups['email_verify'][0]].mail_uuid }}"
+    timeout: 30

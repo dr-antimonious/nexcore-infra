@@ -2,6 +2,10 @@
 - name: Verify DNS configuration
   ansible.builtin.include_tasks: test_dns.yml
 
+- name: Verify email configuration for each user
+  ansible.builtin.include_tasks: test_email.yml
+  loop: "{{ users }}"
+
 - name: Handle empty report
   ansible.builtin.set_fact:
     run_report: "{{ run_report | default({}) }}"

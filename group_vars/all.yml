@@ -10,8 +10,9 @@ dns_records:
   www: "{{ www_record_required | default(false) }}"
   wiki: "{{ wiki_record_required | default(false) }}"
 
+ops_user: ops01
 users:
-- username: ops01
+- username: "{{ ops_user }}"
   groups:
   - ops
   sudo: yes

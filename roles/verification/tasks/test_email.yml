@@ -1,0 +1,8 @@
+---
+- name: Send email
+  ansible.builtin.include_tasks: test_send_email.yml
+  when: "'email_verify' in group_names"
+
+- name: Receive email
+  ansible.builtin.include_tasks: test_recv_email.yml
+  when: "'email' in group_names"

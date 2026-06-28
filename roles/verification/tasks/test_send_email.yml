@@ -1,0 +1,29 @@
+---
+- name: Install mail utilities
+  ansible.builtin.package:
+    name:
+    - postfix
+    - s-nail
+    state: present
+
+- name: Ensure postfix is started
+  ansible.builtin.service:
+    name: postfix
+    state: started
+
+- name: Generate UUID
+  ansible.builtin.command:
+    cmd: uuidgen
+  register: uuid
+  changed_when: false
+
+- name: Save UUID
+  ansible.builtin.set_fact:
+    mail_uuid: "{{ uuid.stdout }}"
+
+- name: Send test email to each user
+  ansible.builtin.shell: |
+    echo "{{ mail_uuid }}" | mail -s "MAIL-TEST-{{ mail_uuid }}" "{{ item.username }}@{{ company_domain }}"
+  args:
+    executable: /bin/bash
+  changed_when: false

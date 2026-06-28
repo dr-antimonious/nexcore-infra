@@ -1,12 +1,12 @@
 $TTL 86400
-@ IN SOA {{ groups['dns'][0] }}.{{ company_domain }}. ops01.{{ company_domain }}. (
+@ IN SOA {{ ansible_hostname }}.{{ company_domain }}. {{ ops_user }}.{{ company_domain }}. (
     2026062201
     3600
     1800
     604800
     86400 )
 
-@ IN NS {{ groups['dns'][0] }}.{{ company_domain }}.
+@ IN NS {{ ansible_hostname }}.{{ company_domain }}.
 
 {% for hostname in groups['all'] %}
 {{ hostname }} IN A {{ hostvars[hostname].ansible_host }}

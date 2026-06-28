@@ -1,2 +1,3 @@
 ---
 wiki_record_required: yes
+mediawiki_php_version: "8.2"

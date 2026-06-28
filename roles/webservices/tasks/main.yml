@@ -1,0 +1,11 @@
+---
+- name: Install packages
+  ansible.builtin.package:
+    name: "{{ web_packages }}"
+    state: present
+
+- name: Ensure httpd is enabled
+  ansible.builtin.service:
+    name: httpd
+    state: started
+    enabled: true

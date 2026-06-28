@@ -1,0 +1,14 @@
+<VirtualHost *:80>
+    ServerAdmin {{ ops_user }}@{{ company_domain }}
+    ServerName wiki.{{ company_domain }}
+    DocumentRoot {{ mediawiki_dir }}
+
+    <Directory {{ mediawiki_dir }}>
+        Options FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    ErrorLog /var/log/httpd/wiki_error.log
+    CustomLog /var/log/httpd/wiki_access.log combined
+</VirtualHost>

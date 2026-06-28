@@ -1,0 +1,58 @@
+---
+- name: Check if WordPress exists
+  ansible.builtin.stat:
+    path: "{{ wordpress_dir }}/wp-config.php"
+  register: wp_exists
+
+- name: Install WordPress
+  block:
+  - name: Ensure target directory exists
+    ansible.builtin.file:
+      path: "{{ wordpress_dir }}"
+      state: directory
+      owner: apache
+      group: apache
+      mode: '0755'
+      setype: httpd_sys_content_t
+
+  - name: Download WordPress tarball
+    ansible.builtin.get_url:
+      url: "{{ wordpress_url }}"
+      dest: "/tmp/{{ wordpress_tar }}"
+      mode: '0644'
+
+  - name: Extract WordPress into /var/www/www
+    ansible.builtin.unarchive:
+      src: "/tmp/{{ wordpress_tar }}"
+      dest: "{{ wordpress_dir }}"
+      remote_src: yes
+      extra_opts:
+      - --strip-components=1
+
+  - name: Copy wp-config.php
+    ansible.builtin.copy:
+      src: "{{ wordpress_dir }}/wp-config-sample.php"
+      dest: "{{ wordpress_dir }}/wp-config.php"
+      remote_src: yes
+      owner: apache
+      group: apache
+      mode: '0755'
+      setype: httpd_sys_content_t
+
+  - name: Configure WordPress database settings
+    ansible.builtin.lineinfile:
+      path: "{{ wordpress_dir }}/wp-config.php"
+      regexp: "^define\\(\\s*'{{ item.key }}',"
+      line: "define( '{{ item.key }}', '{{ item.value }}' );"
+    loop: "{{ wp_conf_list }}"
+
+  - name: Deploy httpd conf file
+    ansible.builtin.template:
+      src: "{{ www_j2_name }}"
+      dest: "{{ www_conf_path }}"
+      owner: root
+      group: root
+      mode: '0644'
+      setype: etc_t
+    notify: Restart httpd
+  when: not wp_exists.stat.exists

@@ -1,0 +1,13 @@
+---
+- name: Open HTTP on firewall
+  ansible.posix.firewalld:
+    service: http
+    permanent: true
+    state: enabled
+    immediate: true
+
+- name: Configure SELinux context
+  ansible.builtin.seboolean:
+    name: httpd_can_network_connect_db
+    state: true
+    persistent: true

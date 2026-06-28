@@ -1,0 +1,14 @@
+<VirtualHost *:80>
+    ServerAdmin {{ ops_user }}@{{ company_domain }}
+    ServerName www.{{ company_domain }}
+    DocumentRoot {{ wordpress_dir }}
+
+    <Directory {{ wordpress_dir }}>
+        Options FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    ErrorLog /var/log/httpd/www_error.log
+    CustomLog /var/log/httpd/www_access.log combined
+</VirtualHost>

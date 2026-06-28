@@ -1,0 +1,65 @@
+---
+- name: Check if mediawiki exists
+  ansible.builtin.stat:
+    path: "{{ mediawiki_dir }}/LocalSettings.php"
+  register: mw_exists
+
+- name: Install mediawiki
+  block:
+  - name: Ensure target directory exists
+    ansible.builtin.file:
+      path: "{{ mediawiki_dir }}"
+      state: directory
+      owner: apache
+      group: apache
+      mode: '0755'
+      setype: httpd_sys_content_t
+
+  - name: Download MediaWiki tarball
+    ansible.builtin.get_url:
+      url: "{{ mediawiki_url }}"
+      dest: "/tmp/mediawiki-{{ mediawiki_minor }}.tar.gz"
+      mode: '0644'
+
+  - name: Extract MediaWiki into /var/html/wiki
+    ansible.builtin.unarchive:
+      src: "/tmp/mediawiki-{{ mediawiki_minor }}.tar.gz"
+      dest: "{{ mediawiki_dir }}"
+      remote_src: yes
+      extra_opts:
+      - --strip-components=1
+
+  - name: Run MediaWiki CLI installer
+    ansible.builtin.command:
+      argv:
+      - php
+      - maintenance/install.php
+      - --dbname
+      - "{{ mediawiki_db }}"
+      - --dbserver
+      - "{{ groups['database'][0] }}"
+      - --dbuser
+      - "{{ mediawiki_user }}"
+      - --dbpass
+      - "{{ mediawiki_password }}"
+      - --scriptpath
+      - ""
+      - --server
+      - "http://wiki.{{ company_domain }}"
+      - --pass
+      - "{{ ops_wiki_pass }}"
+      - "{{ company_name }} wiki"
+      - "{{ ops_user }}"
+    args:
+      chdir: "{{ mediawiki_dir }}"
+
+  - name: Deploy httpd conf file
+    ansible.builtin.template:
+      src: "{{ wiki_j2_name }}"
+      dest: "{{ wiki_conf_path }}"
+      owner: root
+      group: root
+      mode: '0644'
+      setype: etc_t
+    notify: Restart httpd
+  when: not mw_exists.stat.exists

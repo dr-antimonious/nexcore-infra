@@ -1,0 +1,17 @@
+---
+wordpress_dir: /var/www/www
+wordpress_tar: latest.tar.gz
+wordpress_url: "https://wordpress.org/{{ wordpress_tar }}"
+
+www_j2_name: www.conf.j2
+www_conf_path: /etc/httpd/conf.d/www.conf
+
+wp_conf_list:
+- key: DB_NAME
+  value: "{{ wordpress_db }}"
+- key: DB_USER
+  value: "{{ wordpress_user }}"
+- key: DB_PASSWORD
+  value: "{{ wordpress_password }}"
+- key: DB_HOST
+  value: "{{ groups['database'][0] }}"

@@ -1,0 +1,8 @@
+---
+web_packages:
+- php
+- php-mysqlnd
+- php-gd
+- php-xml
+- php-mbstring
+- php-intl

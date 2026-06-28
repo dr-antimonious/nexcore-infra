@@ -1,7 +1,9 @@
 ---
-- name: Install Postfix
+- name: Install Postfix and mail utilities
   ansible.builtin.package:
-    name: postfix
+    name:
+    - postfix
+    - s-nail
     state: present
 
 - name: Ensure postfix is enabled
@@ -11,14 +13,5 @@
     state: started
 
 - name: Configure Postfix
-  ansible.builtin.command:
-    cmd: "postconf -e '{{ item }}'"
-  loop: "{{ postfix_config }}"
-  notify: Restart postfix
-
-- name: Open SMTP port 25
-  ansible.posix.firewalld:
-    port: 25/tcp
-    permanent: true
-    state: enabled
-    immediate: true
+  ansible.builtin.include_tasks: mail_server.yml
+  when: "'email' in group_names"

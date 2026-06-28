@@ -1,0 +1,8 @@
+---
+mediawiki_version: "1.41"
+mediawiki_minor: "{{ mediawiki_version }}.5"
+mediawiki_dir: "{{ web_dir }}/wiki"
+mediawiki_url: "https://releases.wikimedia.org/mediawiki/{{ mediawiki_version }}/mediawiki-{{ mediawiki_minor }}.tar.gz"
+
+wiki_j2_name: wiki.conf.j2
+wiki_conf_path: /etc/httpd/conf.d/wiki.conf

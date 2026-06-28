@@ -26,11 +26,23 @@
       regexp: 'allow-query\s*\{.*\};'
       replace: 'allow-query { localhost; {{ network_mask }}; };'
 
-  - name: Setup DNS as authoritative
+  - name: Allow recursion
     ansible.builtin.replace:
       path: "{{ named_path }}"
       regexp: 'recursion.*;'
-      replace: 'recursion no;'
+      replace: 'recursion yes;'
+
+  - name: Add DNS forwarders
+    ansible.builtin.blockinfile:
+      path: "{{ named_path }}"
+      marker: "/* {mark} ANSIBLE MANAGED FORWARDERS */"
+      insertafter: 'options\s*\{'
+      block: |
+        forwarders {
+            1.1.1.1;
+            8.8.8.8;
+        };
+        forward only;
 
   - name: Add zone definition
     ansible.builtin.blockinfile:

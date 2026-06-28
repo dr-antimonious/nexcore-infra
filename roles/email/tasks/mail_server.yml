@@ -1,0 +1,13 @@
+---
+- name: Configure Postfix
+  ansible.builtin.command:
+    cmd: "postconf -e '{{ item }}'"
+  loop: "{{ postfix_config }}"
+  notify: Restart postfix
+
+- name: Open SMTP port 25
+  ansible.posix.firewalld:
+    port: 25/tcp
+    permanent: true
+    state: enabled
+    immediate: true

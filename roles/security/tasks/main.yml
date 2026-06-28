@@ -7,3 +7,7 @@
 
 - name: Configure sudo access
   ansible.builtin.include_tasks: sudo_setup.yml
+
+- name: Configure HTTP access
+  ansible.builtin.include_tasks: web_setup.yml
+  when: "'webservices' in group_names"

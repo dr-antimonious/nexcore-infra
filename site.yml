@@ -9,7 +9,11 @@
   - role: cleanup # Only necessary because of the super weird RedHat lab configuration
   - role: users
   - role: security
-#  - role: dns
+  - role: dns
+  become: yes
+
+- hosts: all
+  roles:
   - role: storage
   become: yes
 
@@ -18,6 +22,32 @@
   - role: automount
   become: yes
 
+- hosts: database
+  roles:
+  - role: database
+  become: yes
+
+#- hosts: wiki
+#  roles:
+#  - role: wiki
+#  become: yes
+
+#- hosts: www
+#  roles:
+#  - role: www
+#  become: yes
+
+#- hosts: email
+#  roles:
+#  - role: email
+#  become: yes
+
 - hosts: all
   roles:
-  - role: debug
+  - role: logging
+  - role: patching
+  become: yes
+
+- hosts: all
+  roles:
+  - role: verification

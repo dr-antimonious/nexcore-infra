@@ -1,5 +1,5 @@
 ---
-- name: Restart NFS
+- name: Restart rsyslog
   ansible.builtin.service:
-    name: nfs-server
+    name: rsyslog
     state: restarted

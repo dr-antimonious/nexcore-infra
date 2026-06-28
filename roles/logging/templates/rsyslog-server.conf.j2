@@ -1,0 +1,6 @@
+module(load="imtcp")
+input(type="imtcp" port="{{ logging_port }}")
+
+$template RemoteLogs,"{{ remote_log_dir }}/%HOSTNAME%.log"
+*.* ?RemoteLogs
+& stop

@@ -1,9 +1,4 @@
 ---
-- name: Install LVM tools
-  ansible.builtin.package:
-    name: lvm2
-    state: present
-
 - name: Install NFS utilities
   ansible.builtin.include_tasks: nfs_utils.yml
 
@@ -13,58 +8,38 @@
     state: started
     enabled: true
 
-- name: Create partitions
-  community.general.parted:
-    device: "{{ item }}"
-    number: 1
-    flags: [lvm]
-    state: present
-  loop: "{{ dev_list }}"
-
-- name: Create volume group
-  community.general.lvg:
-    vg: "{{ vg_name }}"
-    pvs: "{{ part_list }}"
-
-- name: Create logical volume
-  community.general.lvol:
-    vg: "{{ vg_name }}"
-    lv: "{{ lv_name }}"
-    size: 100%FREE
-    pvs: "{{ part_list }}"
-    shrink: false
-
-- name: Create filesystem
-  community.general.filesystem:
-    dev: "/dev/{{ vg_name }}/{{ lv_name }}"
-    fstype: xfs
-
-- name: Create mount point
-  ansible.builtin.file:
-    path: "{{ shared_mount }}"
-    state: directory
-    owner: root
-    group: "{{ shared_group }}"
-    mode: '2770'
-
-- name: Mount filesystem
-  ansible.posix.mount:
-    path: "{{ shared_mount }}"
-    src: "/dev/{{ vg_name }}/{{ lv_name }}"
-    fstype: xfs
-    state: mounted
+- name: Setup LVM
+  ansible.builtin.include_role:
+    name: lvm
+  vars:
+    vg_name: "{{ storage_vg }}"
+    lv_name: "{{ storage_lv }}"
+    dev_list: "{{ storage_dev_list }}"
+    mount_path: "{{ shared_mount }}"
+    mount_group: "{{ storage_group }}"
+    create_mount_point: true
 
 - name: Configure export
   ansible.builtin.lineinfile:
     path: "{{ exports_path }}"
     line: "{{ shared_mount }} {{ network_mask }}(rw,sync)"
     create: yes
+    owner: root
+    group: root
+    mode: '0644'
   register: export_report
 
-- name: Restart NFS
-  ansible.builtin.service:
-    name: nfs-server
-    state: restarted
+- name: Ensure proper setup
+  block:
+  - name: Ensure SELinux context
+    ansible.builtin.file:
+      path: "{{ exports_path }}"
+      setype: etc_t
+
+  - name: Restart NFS
+    ansible.builtin.service:
+      name: nfs-server
+      state: restarted
   when: export_report.changed | default(false)
 
 - name: Open DNS ports
@@ -75,11 +50,20 @@
     immediate: true
   loop: "{{ storage_services }}"
 
+- name: Create directory for per-user directories
+  ansible.builtin.file:
+    path: "{{ shared_mount }}/users"
+    state: directory
+    owner: root
+    group: "{{ storage_group }}"
+    mode: '2770'    
+
 - name: Create per-user NFS directories
   ansible.builtin.file:
-    path: "{{ shared_mount }}/users/{{ item }}"
+    path: "{{ shared_mount }}/users/{{ item.username }}"
     state: directory
-    owner: "{{ item }}"
-    group: "{{ item }}"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
     mode: '0750'
   loop: "{{ users }}"
+  when: storage_group in item.groups | default([])

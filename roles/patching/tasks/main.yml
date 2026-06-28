@@ -1,0 +1,56 @@
+---
+- name: Load OS-specific variables
+  ansible.builtin.include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Install maintenance packages
+  ansible.builtin.package:
+    name: "{{ maintenance_packages }}"
+    state: present
+
+- name: Ensure cron is running
+  ansible.builtin.service:
+    name: "{{ cron_service }}"
+    state: started
+    enabled: true
+
+- name: Install health check script
+  ansible.builtin.template:
+    src: "{{ health_sh_j2_name }}"
+    dest: "{{ health_sh_path }}"
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Install weekly patching script
+  ansible.builtin.template:
+    src: "{{ patch_sh_j2_name }}"
+    dest: "{{ patch_sh_path }}"
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Schedule daily health check
+  ansible.builtin.cron:
+    name: Health check
+    minute: "0"
+    hour: "3"
+    user: root
+    job: "{{ health_sh_path }}"
+
+- name: Schedule weekly patching
+  ansible.builtin.cron:
+    name: Weekly patching
+    minute: "0"
+    hour: "4"
+    weekday: "0"
+    user: root
+    job: "{{ patch_sh_path }}"
+
+- name: Configure logrotate for health check log
+  ansible.builtin.template:
+    src: "{{ health_lr_j2_name }}"
+    dest: "{{ health_lr_conf_path }}"
+    owner: root
+    group: root
+    mode: '0644'
+    setype: etc_t

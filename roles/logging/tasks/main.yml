@@ -1,0 +1,13 @@
+---
+- name: Install rsyslog
+  ansible.builtin.package:
+    name: rsyslog
+    state: present
+
+- name: Setup log server
+  ansible.builtin.include_tasks: log_server.yml
+  when: "'logkeeper' in group_names"
+
+- name: Setup log client
+  ansible.builtin.include_tasks: log_client.yml
+  when: "'logkeeper' not in group_names"

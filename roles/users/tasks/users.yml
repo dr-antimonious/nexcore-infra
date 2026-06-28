@@ -6,24 +6,9 @@
     state: present
     create_home: yes
     password_lock: yes
-    group: >-
-      {{
-        item.groups[0]
-        if item.groups | length > 0
-        else omit
-      }}
-    groups: >-
-      {{
-        item.groups[1:]
-        if item.groups | length > 1
-        else omit
-      }}
-    append: >-
-      {{
-        yes
-        if item.groups | length > 1
-        else omit
-      }}
+    group: "{{ item.username }}"
+    groups: "{{ item.groups | default(omit) }}"
+    append: "{{ true if item.groups is defined else omit }}"
   register: user_results
   loop: "{{ users }}"
 

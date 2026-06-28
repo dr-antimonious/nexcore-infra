@@ -9,7 +9,7 @@
       state: present
 
   - name: Enable and start named
-    ansible.builtin.systemd:
+    ansible.builtin.service:
       name: named
       enabled: true
       state: started

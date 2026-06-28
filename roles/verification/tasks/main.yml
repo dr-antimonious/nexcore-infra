@@ -1,0 +1,12 @@
+---
+- name: Verify DNS configuration
+  ansible.builtin.include_tasks: test_dns.yml
+
+- name: Handle empty report
+  ansible.builtin.set_fact:
+    run_report: "{{ run_report | default({}) }}"
+
+- name: Print playbook report
+  ansible.builtin.set_stats:
+    data: "{{ run_report }}"
+    per_host: true

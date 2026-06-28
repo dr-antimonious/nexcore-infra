@@ -1,3 +1,5 @@
 {% for user in users %}
-{{ user }} {{ groups['storage'][0] }}:{{ shared_mount }}/users/{{ user }}
+{% if 'dev' in user.groups | default([]) %}
+/home/{{ user.username }}/Company_Share {{ groups['storage'][0] }}:{{ shared_mount }}/users/{{ user.username }}
+{% endif %}
 {% endfor %}

@@ -1,0 +1,4 @@
+---
+map_j2_path: auto.company.j2
+master_j2_path: company.autofs.j2
+autofs_conf_dir: /etc/auto.master.d

@@ -12,12 +12,12 @@ $TTL 86400
 {{ hostname }} IN A {{ hostvars[hostname].ansible_host }}
 {% endfor %}
 
-{% for hostname in groups['all'] %}
-{% for record, required in hostvars[hostname].dns_records.items() | default({}) %}
-{% if required %}
+{% for hostname in groups['all'] -%}
+{% for record, required in hostvars[hostname].dns_records.items() | default({}) -%}
+{% if required -%}
 {{ record }} IN A {{ hostvars[hostname].ansible_host }}
-{% endif %}
-{% endfor %}
-{% endfor %}
+{% endif -%}
+{% endfor -%}
+{% endfor -%}
 
-@ IN MX 10 {{ groups['mail'][0] }}.{{ company_domain }}.
+@ IN MX 10 {{ groups['email'][0] }}.{{ company_domain }}.

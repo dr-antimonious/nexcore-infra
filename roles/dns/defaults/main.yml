@@ -1,6 +1,5 @@
 ---
 net_conn_name: System eth0
-
 named_path: /etc/named.conf
 zones_path: /etc/named.rfc1912.zones
 zone_def_j2: company.domain.zone.j2

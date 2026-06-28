@@ -1,0 +1,89 @@
+---
+- name: Setup LVM
+  ansible.builtin.include_role:
+    name: lvm
+  vars:
+    vg_name: "{{ database_vg }}"
+    lv_name: "{{ database_lv }}"
+    dev_list: "{{ database_dev_list }}"
+    mount_path: "{{ database_mount }}"
+
+- name: Install MariaDB
+  ansible.builtin.package:
+    name:
+      - mariadb-server
+      - python3-PyMySQL
+    state: present
+
+- name: Ensure MariaDB is enabled
+  ansible.builtin.service:
+    name: mariadb
+    enabled: true
+    state: started
+
+- name: Check if root already set
+  ansible.builtin.stat:
+    path: "{{ flag_file }}"
+  register: mariadb_root_set
+
+- name: Set MariaDB root password
+  block:
+  - name: Set MariaDB root password
+    ansible.mysql.mysql_user:
+      name: root
+      host: localhost
+      password: "{{ mysql_root_password }}"
+      check_implicit_admin: true
+      login_unix_socket: /var/lib/mysql/mysql.sock
+      state: present
+
+  - name: Create root confirmation file
+    ansible.builtin.file:
+      path: "{{ flag_file }}"
+      owner: root
+      group: root
+      mode: '0644'
+      state: touch
+  when: not mariadb_root_set.stat.exists
+
+- name: Remove anonymous users
+  ansible.mysql.mysql_user:
+    name: ""
+    host_all: true
+    state: absent
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+
+- name: Remove test database
+  ansible.mysql.mysql_db:
+    name: test
+    state: absent
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+
+- name: Create databases
+  ansible.mysql.mysql_db:
+    name: "{{ item }}"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+  loop: "{{ databases }}"
+
+- name: Create DB users
+  ansible.mysql.mysql_user:
+    name: "{{ item.name }}"
+    password: "{{ item.password }}"
+    host: "{{ item.host }}"
+    priv: "{{ item.database }}.*:ALL"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+  loop: "{{ db_users }}"
+
+- name: Allow remote database access
+  ansible.posix.firewalld:
+    rich_rule: 'rule family="ipv4" source address="{{ hostvars[item].ansible_host }}" service name="mysql" accept'
+    permanent: true
+    state: enabled
+    immediate: true
+  loop: "{{ groups['webservices'] }}"

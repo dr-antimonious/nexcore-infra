@@ -1,0 +1,13 @@
+---
+script_dir: /usr/local/bin
+cron_dir: /etc/cron.d
+health_log_path: "/var/log/{{ company_name }}-health.log"
+
+health_lr_j2_name: company-health-logrotate.j2
+health_lr_conf_path: "/etc/logrotate.d/{{ company_name }}-health"
+
+health_sh_j2_name: company-health.sh.j2
+health_sh_path: "{{ script_dir }}/{{ company_name }}-health.sh"
+
+patch_sh_j2_name: company-patch.sh.j2
+patch_sh_path: "{{ script_dir }}/{{ company_name }}-patch.sh"

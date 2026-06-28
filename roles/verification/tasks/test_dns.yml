@@ -1,7 +1,4 @@
 ---
-- name: Trigger service restart before testing
-  ansible.builtin.meta: flush_handlers
-
 - name: Try to resolve domains
   ansible.builtin.command:
     cmd: "getent hosts {{ item }}.{{ company_domain }}"

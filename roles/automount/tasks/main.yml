@@ -3,5 +3,45 @@
   ansible.builtin.package:
     name: autofs
     state: present
+  register: autofs_install_report
 
+- name: Setup autofs
+  block:
+  - name: Ensure proper state of autofs
+    ansible.builtin.service:
+      name: autofs
+      state: "{{ 'started' if autofs_install_report.changed | default(false) else 'stopped' }}"
+      enabled: true
+    register: autofs_state_report
 
+  - name: Setup autofs
+    block:
+    - name: Deploy indirect map file
+      ansible.builtin.template:
+        src: "{{ map_j2_path }}"
+        dest: "/etc/auto.{{ company_name }}"
+        owner: root
+        group: root
+        mode: '0644'
+        setype: etc_t
+
+    - name: Deploy master fragment file
+      ansible.builtin.template:
+        src: "{{ master_j2_path }}"
+        dest: "{{ autofs_conf_dir }}/{{ company_name }}.autofs"
+        owner: root
+        group: root
+        mode: '0644'
+        setype: etc_t
+
+    - name: Create Company_Share mount points
+      ansible.builtin.file:
+        path: "/home/{{ item.username }}/Company_Share"
+        state: directory
+        owner: "{{ item.username }}"
+        group: "{{ item.username }}"
+        mode: '0755'
+      loop: "{{ users }}"
+      when: "'dev' in item.groups | default([])"
+    when: autofs_state_report.changed | default(false)
+  notify: Restart autofs

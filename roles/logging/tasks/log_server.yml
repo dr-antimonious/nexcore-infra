@@ -1,0 +1,26 @@
+---
+- name: Create remote log directory
+  ansible.builtin.file:
+    path: "{{ remote_log_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+    setype: var_log_t
+
+- name: Enable rsyslog TCP reception
+  ansible.builtin.template:
+    src: "{{ server_j2_name }}"
+    dest: "{{ server_conf_path }}"
+    owner: root
+    group: root
+    mode: '0644'
+    setype: etc_t
+  notify: Restart rsyslog
+
+- name: Open TCP port for rsyslog reception
+  ansible.builtin.firewalld:
+    port: "{{ logging_port }}/tcp"
+    permanent: true
+    state: enabled
+    immediate: true

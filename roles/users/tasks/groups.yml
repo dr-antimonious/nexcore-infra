@@ -1,12 +1,20 @@
 ---
-- name: Add groups
+- name: Create primary groups
+  ansible.builtin.group:
+    name: "{{ item.username }}"
+    state: present
+  register: primary_report
+  loop: "{{ users }}"
+
+- name: Create secondary groups
   ansible.builtin.group:
     name: "{{ item }}"
     state: present
-  register: group_results
+  register: secondary_report
   loop: >-
     {{
        users
+       | selectattr('groups', 'defined')
        | map(attribute='groups')
        | flatten
        | unique
@@ -17,10 +25,19 @@
   ansible.builtin.set_fact:
     created_groups: >-
       {{
-        group_results.results
-        | selectattr('changed', 'equalto', true)
-        | map(attribute='item')
-        | list
+        (
+          primary_report.results
+          | selectattr('changed', 'equalto', true)
+          | map(attribute='item')
+          | list
+        )
+        +
+        (
+          secondary_report.results
+          | selectattr('changed', 'equalto', true)
+          | map(attribute='item')
+          | list
+        )
       }}
 
 - name: Accumulate created groups into report

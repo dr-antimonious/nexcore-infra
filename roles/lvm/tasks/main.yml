@@ -1,0 +1,51 @@
+---
+- name: Install LVM tools
+  ansible.builtin.package:
+    name: lvm2
+    state: present
+
+- name: Create partitions
+  community.general.parted:
+    device: "{{ item }}"
+    number: 1
+    flags: [lvm]
+    state: present
+  loop: "{{ dev_list }}"
+
+- name: Create partition list
+  ansible.builtin.set_fact:
+    part_list: "{{ dev_list | map('regex_replace', '$', '1') | list }}"
+
+- name: Create volume group
+  community.general.lvg:
+    vg: "{{ vg_name }}"
+    pvs: "{{ part_list }}"
+
+- name: Create logical volume
+  community.general.lvol:
+    vg: "{{ vg_name }}"
+    lv: "{{ lv_name }}"
+    size: 100%FREE
+    pvs: "{{ part_list }}"
+    shrink: false
+
+- name: Create filesystem
+  community.general.filesystem:
+    dev: "/dev/{{ vg_name }}/{{ lv_name }}"
+    fstype: xfs
+
+- name: Create mount point
+  ansible.builtin.file:
+    path: "{{ mount_path }}"
+    state: directory
+    owner: root
+    group: "{{ mount_group }}"
+    mode: '2770'
+  when: create_mount_point | default(false)
+
+- name: Mount filesystem
+  ansible.posix.mount:
+    path: "{{ mount_path }}"
+    src: "/dev/{{ vg_name }}/{{ lv_name }}"
+    fstype: xfs
+    state: mounted

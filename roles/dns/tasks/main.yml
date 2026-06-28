@@ -12,6 +12,3 @@
     dns4_search: "{{ company_domain }}"
     state: present
   notify: Restart NetworkManager
-
-- name: Test DNS configuration
-  ansible.builtin.include_tasks: test_dns.yml

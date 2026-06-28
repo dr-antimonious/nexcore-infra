@@ -5,7 +5,7 @@
     state: present
 
 - name: Enable and start firewalld
-  ansible.builtin.systemd:
+  ansible.builtin.service:
     name: firewalld
     enabled: true
     state: started

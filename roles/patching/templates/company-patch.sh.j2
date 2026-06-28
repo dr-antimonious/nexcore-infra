@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+
+{{ patch_update_cmd }}
+
+{{ patch_clean_cmd }}
+
+if {{ patch_reboot_check }}; then
+    /usr/sbin/reboot
+fi

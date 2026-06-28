@@ -1,0 +1,10 @@
+---
+patch_update_cmd: dnf -y upgrade
+patch_clean_cmd: dnf clean all
+patch_reboot_check: needs-restarting -r
+
+cron_service: crond
+maintenance_packages:
+- cronie
+- logrotate
+- dnf-utils

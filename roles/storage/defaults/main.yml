@@ -1,9 +1,8 @@
 ---
-shared_mount: /mnt/shared
-shared_group: dev
+storage_group: dev
+storage_vg: vg_shared
+storage_lv: lv_shared
 
-vg_name: vg_shared
-lv_name: lv_shared
 exports_path: /etc/exports
 
 storage_services:
@@ -11,10 +10,6 @@ storage_services:
 - rpc-bind
 - mountd
 
-dev_list:
+storage_dev_list:
 - /dev/vdb
 - /dev/vdc
-
-part_list:
-- /dev/vdb1
-- /dev/vdc1

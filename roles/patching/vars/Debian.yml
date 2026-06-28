@@ -1,0 +1,15 @@
+---
+patch_update_cmd: |
+  apt-get update
+  DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade
+
+patch_clean_cmd: |
+  apt-get autoremove -y
+  apt-get clean
+
+patch_reboot_check: test -f /var/run/reboot-required
+
+cron_service: cron
+maintenance_packages:
+- {{ cron_service }}
+- logrotate

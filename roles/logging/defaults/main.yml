@@ -1,0 +1,13 @@
+---
+logging_port: 514
+remote_log_dir: /var/log/remote
+
+rsyslog_dir: /etc/rsyslog.d
+rsyslog_j2_prefix: rsyslog
+rsyslog_j2_suffix: conf.j2
+
+server_j2_name: "{{ rsyslog_j2_prefix }}-server.{{ rsyslog_j2_suffix }}"
+server_conf_path: "{{ rsyslog_dir }}/10-{{ company_name }}.conf"
+
+client_j2_name: "{{ rsyslog_j2_prefix }}-client.{{ rsyslog_j2_suffix }}"
+client_conf_path: "{{ rsyslog_dir }}/10-{{ company_name }}.conf"

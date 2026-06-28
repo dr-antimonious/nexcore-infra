@@ -1,0 +1,20 @@
+---
+database_vg: vg_mysql
+database_lv: lv_mysql
+database_mount: /var/lib/mysql
+database_dev_list: [/dev/vdd]
+flag_file: /var/lib/mysql/.root_setup
+
+databases:
+- "{{ mediawiki_db }}"
+- "{{ wordpress_db }}"
+
+db_users:
+- name: "{{ mediawiki_user }}"
+  password: "{{ mediawiki_password }}"
+  host: "{{ groups['wiki'][0] }}"
+  database: "{{ mediawiki_db }}"
+- name: "{{ wordpress_user }}"
+  password: "{{ wordpress_password }}"
+  host: "{{ groups['www'][0] }}"
+  database: "{{ wordpress_db }}"

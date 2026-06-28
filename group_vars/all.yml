@@ -3,7 +3,7 @@ company_name: nexcore
 company_domain: "{{ company_name }}.local"
 
 pubkey_dir: sshkeys/
-
+shared_mount: /mnt/shared
 network_mask: 172.25.250.0/24
 
 dns_records:

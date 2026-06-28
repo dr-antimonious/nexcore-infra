@@ -1,0 +1,10 @@
+---
+- name: Configure rsyslog client forwarding
+  ansible.builtin.template:
+    src: "{{ client_j2_name }}"
+    dest: "{{ client_conf_path }}"
+    owner: root
+    group: root
+    mode: '0644'
+    setype: etc_t
+  notify: Restart rsyslog

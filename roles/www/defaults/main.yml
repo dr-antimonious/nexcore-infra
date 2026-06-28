@@ -1,5 +1,5 @@
 ---
-wordpress_dir: /var/www/www
+wordpress_dir: "{{ web_dir }}/www"
 wordpress_tar: latest.tar.gz
 wordpress_url: "https://wordpress.org/{{ wordpress_tar }}"
 
